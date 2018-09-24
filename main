@@ -1,0 +1,43 @@
+import tweepy
+from tkinter import *
+import json
+import twitter_credentials
+
+class MyStreamListener(tweepy.StreamListener):
+
+    def on_data(self, data):
+
+        # print(data)
+
+        tweet = data.split(',"text":"')[1].split('","source')[0]
+        print(tweet)
+
+        # saveThis = str(time.time()) + '::' + tweet
+        saveFile = open('twitterTest.csv', 'a')
+        saveFile.write(tweet)
+        saveFile.write('\n')
+        saveFile.close()
+        return True
+
+
+    def on_connect(self):
+        print("connection engaged")
+
+    def on_status(self, status):
+        print(status.text)
+
+    def on_error(self, status):
+        print(status)
+
+
+
+if __name__ == "__main__":
+
+    listener = MyStreamListener()
+    auth = tweepy.OAuthHandler(twitter_credentials.consumer_key, twitter_credentials.consumer_secret)
+    auth.set_access_token(twitter_credentials.access_token, twitter_credentials.access_token_secret)
+    api = tweepy.API(auth)
+
+    myStream = tweepy.Stream(auth = api.auth, listener = MyStreamListener())
+
+    myStream.filter(track=['python'], async = True)
